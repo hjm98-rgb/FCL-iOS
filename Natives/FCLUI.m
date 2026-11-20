@@ -1064,7 +1064,7 @@
         [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     } else if ([title isEqualToString:@"控制器布局"]) {
-        [(LauncherNavigationController *)self.navigationController enterCustomControls];
+        [(LauncherNavigationController *)self.navigationController performSelector:@selector(enterCustomControls)];
     } else if ([title isEqualToString:@"下载源"]) {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"下载源"
             message:@"版本与资源下载优先使用官方源，失败时自动回退 BMCLAPI 镜像。"
