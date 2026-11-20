@@ -11,7 +11,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>FCL</string>
 	<key>CFBundleExecutable</key>
-	<string>FCL</string>
+	<string>AngelAuraAmethyst</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundleAlternateIcons</key>
