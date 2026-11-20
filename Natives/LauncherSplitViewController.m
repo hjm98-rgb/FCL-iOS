@@ -1,6 +1,7 @@
 #import "LauncherSplitViewController.h"
 #import "LauncherMenuViewController.h"
 #import "LauncherProfilesViewController.h"
+#import "FCLUI.h"
 #import "LauncherNavigationController.h"
 #import "LauncherPreferences.h"
 #import "utils.h"
@@ -23,13 +24,15 @@ extern NSMutableDictionary *prefDict;
     self.delegate = self;
 
     UINavigationController *masterVc = [[UINavigationController alloc] initWithRootViewController:[[LauncherMenuViewController alloc] init]];
-    LauncherNavigationController *detailVc = [[LauncherNavigationController alloc] initWithRootViewController:[[LauncherProfilesViewController alloc] init]];
+    LauncherNavigationController *detailVc = [[LauncherNavigationController alloc] initWithRootViewController:[[FCLHomeViewController alloc] init]];
     detailVc.toolbarHidden = NO;
 
     self.viewControllers = @[masterVc, detailVc];
     [self changeDisplayModeForSize:self.view.frame.size];
     
-    self.maximumPrimaryColumnWidth = self.view.bounds.size.width * 0.95;
+    self.maximumPrimaryColumnWidth = 64;
+    self.minimumPrimaryColumnWidth = 56;
+    self.view.backgroundColor = [UIColor colorWithWhite:0.08 alpha:1];
 }
 
 - (void)splitViewController:(UISplitViewController *)svc willChangeToDisplayMode:(UISplitViewControllerDisplayMode)displayMode {

@@ -8,6 +8,7 @@
 #import "LauncherPreferences.h"
 #import "LauncherPreferencesViewController.h"
 #import "LauncherProfilesViewController.h"
+#import "FCLUI.h"
 #import "PLProfiles.h"
 #import "UIButton+AFNetworking.h"
 #import "UIImageView+AFNetworking.h"
@@ -113,9 +114,43 @@
         }]];
     }
     
+    // ---- FCL left icon bar (res/layout/activity_main.xml left_menu) ----
+    LauncherMenuCustomItem *homeItem = [LauncherMenuCustomItem vcClass:FCLHomeViewController.class];
+    homeItem.title = @"主页";
+    homeItem.imageName = @"fcl_home";
+    LauncherMenuCustomItem *manageItem = [LauncherMenuCustomItem title:@"版本管理" imageName:@"fcl_manage" action:nil];
+    manageItem.vcArray = @[[[LauncherProfilesViewController alloc] init]];
+    LauncherMenuCustomItem *downloadItem = [LauncherMenuCustomItem vcClass:FCLDownloadViewController.class];
+    downloadItem.title = @"下载";
+    downloadItem.imageName = @"fcl_download";
+    LauncherMenuCustomItem *multiplayerItem = [LauncherMenuCustomItem vcClass:FCLMultiplayerViewController.class];
+    multiplayerItem.title = @"联机";
+    multiplayerItem.imageName = @"fcl_multiplayer";
+    LauncherMenuCustomItem *settingsItem = [LauncherMenuCustomItem title:@"设置" imageName:@"fcl_settings" action:nil];
+    settingsItem.vcArray = @[[[LauncherPreferencesViewController alloc] init]];
+    LauncherMenuCustomItem *controllerItem = [LauncherMenuCustomItem title:@"控制器" imageName:@"fcl_controller" action:^{
+        [contentNavigationController performSelector:@selector(enterCustomControls)];
+    }];
+    __weak LauncherMenuViewController *weakSelfMenu = self;
+    LauncherMenuCustomItem *backItem = [LauncherMenuCustomItem title:@"返回" imageName:@"fcl_back" action:^{
+        LauncherMenuViewController *strongSelf = weakSelfMenu;
+        NSIndexPath *homePath = [NSIndexPath indexPathForRow:0 inSection:0];
+        [strongSelf.tableView selectRowAtIndexPath:homePath animated:NO scrollPosition:UITableViewScrollPositionNone];
+        [strongSelf tableView:strongSelf.tableView didSelectRowAtIndexPath:homePath];
+        strongSelf.lastSelectedIndex = 0;
+    }];
+    self.options = @[homeItem, manageItem, downloadItem, controllerItem,
+                     multiplayerItem, settingsItem, backItem].mutableCopy;
+
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.backgroundColor = [FCLTheme themeColor];
+    self.tableView.rowHeight = 56;
+    self.tableView.showsVerticalScrollIndicator = NO;
+    self.tableView.contentInset = UIEdgeInsetsMake(10, 0, 10, 0);
+    self.tableView.tableFooterView = [UIView new];
+    self.navigationController.navigationBarHidden = YES;
     
-    self.navigationController.toolbarHidden = NO;
+    self.navigationController.toolbarHidden = YES;
     UIActivityIndicatorViewStyle indicatorStyle = UIActivityIndicatorViewStyleMedium;
     UIActivityIndicatorView *toolbarIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:indicatorStyle];
     [toolbarIndicator startAnimating];
@@ -130,10 +165,10 @@
     
     [self updateAccountInfo];
     
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:1 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     [self.tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionNone];
     [self tableView:self.tableView didSelectRowAtIndexPath:indexPath];
-    self.lastSelectedIndex = 1;
+    self.lastSelectedIndex = 0;
     
     if (getEntitlementValue(@"get-task-allow")) {
         [self displayProgress:localize(@"login.jit.checking", nil)];
@@ -199,26 +234,17 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
     }
 
-    cell.textLabel.text = [self.options[indexPath.row] title];
-    
-    UIImage *origImage = [UIImage systemImageNamed:[self.options[indexPath.row]
-        performSelector:@selector(imageName)]];
-    if (origImage) {
-        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(40, 40)];
-        UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext*_Nonnull myContext) {
-            CGFloat scaleFactor = 40/origImage.size.height;
-            [origImage drawInRect:CGRectMake(20 - origImage.size.width*scaleFactor/2, 0, origImage.size.width*scaleFactor, 40)];
-        }];
-        cell.imageView.image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    }
-    
-    if (cell.imageView.image == nil) {
-        cell.imageView.layer.magnificationFilter = kCAFilterNearest;
-        cell.imageView.layer.minificationFilter = kCAFilterNearest;
-        cell.imageView.image = [UIImage imageNamed:[self.options[indexPath.row]
-            performSelector:@selector(imageName)]];
-        cell.imageView.image = [cell.imageView.image _imageWithSize:CGSizeMake(40, 40)];
-    }
+    cell.textLabel.text = nil;
+    cell.backgroundColor = [UIColor clearColor];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    UIView *selectedBG = [[UIView alloc] init];
+    selectedBG.backgroundColor = [FCLTheme cardPressedColor];
+    selectedBG.layer.cornerRadius = 8;
+    cell.selectedBackgroundView = selectedBG;
+    NSString *iconName = [self.options[indexPath.row] performSelector:@selector(imageName)];
+    cell.imageView.image = [FCLTheme templateIcon:iconName];
+    cell.imageView.tintColor = [UIColor whiteColor];
+    cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
     return cell;
 }
 
