@@ -338,7 +338,8 @@
 
 @interface FCLDownloadViewController () <UITableViewDataSource, UITableViewDelegate>
 @property(nonatomic) UITableView *tableView;
-@property(nonatomic) NSArray *rows;
+@property(nonatomic) UISegmentedControl *typeControl;
+@property(nonatomic) NSArray *versions;
 @end
 
 @implementation FCLDownloadViewController
@@ -349,55 +350,116 @@
     [super viewDidLoad];
     self.title = @"下载";
     self.view.backgroundColor = [UIColor colorWithWhite:0.10 alpha:1.0];
-    self.rows = @[
-        @{@"icon": @"fcl_download", @"title": @"游戏版本", @"desc": @"原版 / Forge / Fabric / Quilt / OptiFine"},
-        @{@"icon": @"fcl_manage", @"title": @"整合包", @"desc": @"从 CurseForge / Modrinth 安装整合包"},
-        @{@"icon": @"fcl_manage", @"title": @"模组", @"desc": @"安装单个 .jar 模组"},
-    ];
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleInsetGrouped];
+
+    self.typeControl = [[UISegmentedControl alloc] initWithItems:@[@"正式版", @"快照"]];
+    self.typeControl.selectedSegmentIndex = 0;
+    [self.typeControl addTarget:self action:@selector(onTypeChanged) forControlEvents:UIControlEventValueChanged];
+    self.typeControl.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:self.typeControl];
+
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     self.tableView.backgroundColor = [UIColor clearColor];
+    self.tableView.rowHeight = 60;
     self.tableView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:self.tableView];
+
     [NSLayoutConstraint activateConstraints:@[
+        [self.typeControl.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.typeControl.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
+        [self.typeControl.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:10],
         [self.tableView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [self.tableView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [self.tableView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [self.tableView.topAnchor constraintEqualToAnchor:self.typeControl.bottomAnchor constant:8],
         [self.tableView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
     ]];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(onVersionListUpdated)
+        name:AmethystVersionListUpdatedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(onVersionListUpdated)
+        name:AmethystVersionListFailedNotification object:nil];
+
+    LauncherNavigationController *nav = (LauncherNavigationController *)self.navigationController;
+    [nav fetchRemoteVersionList];
+    [self onTypeChanged];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)onVersionListUpdated {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self onTypeChanged];
+    });
+}
+
+- (void)onTypeChanged {
+    NSString *type = self.typeControl.selectedSegmentIndex == 0 ? @"release" : @"snapshot";
+    NSMutableArray *filtered = [NSMutableArray array];
+    for (NSDictionary *version in remoteVersionList) {
+        if ([version[@"type"] isEqualToString:type]) {
+            [filtered addObject:version];
+        }
+    }
+    self.versions = filtered;
+    [self.tableView reloadData];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.rows.count;
+    return self.versions.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fcl"];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fclversion"];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellSubtitle reuseIdentifier:@"fcl"];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"fclversion"];
     }
-    NSDictionary *row = self.rows[indexPath.row];
-    cell.textLabel.text = row[@"title"];
+    NSDictionary *version = self.versions[indexPath.row];
+    cell.textLabel.text = version[@"id"];
     cell.textLabel.textColor = [FCLTheme themeColor];
-    cell.textLabel.font = [FCLTheme boldFont:16];
-    cell.detailTextLabel.text = row[@"desc"];
+    cell.textLabel.font = [FCLTheme boldFont:15];
+    cell.detailTextLabel.text = version[@"releaseTime"] ?: version[@"type"];
     cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
-    cell.imageView.image = [FCLTheme templateIcon:row[@"icon"]];
-    cell.imageView.tintColor = [FCLTheme themeColor];
-    cell.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.06];
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    cell.imageView.image = [UIImage imageNamed:@"fcl_grass"];
+    cell.imageView.layer.magnificationFilter = kCAFilterNearest;
+    cell.backgroundColor = [UIColor clearColor];
+    UIView *bg = [[UIView alloc] init];
+    bg.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.08];
+    cell.selectedBackgroundView = bg;
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    NSDictionary *version = self.versions[indexPath.row];
+    NSString *versionId = version[@"id"];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:versionId
+        message:@"安装这个版本？安装时会自动下载补全客户端、依赖库和资源文件。"
+        preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"安装并启动" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        [self installVersion:versionId];
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)installVersion:(NSString *)versionId {
+    NSMutableDictionary *profile = [NSMutableDictionary dictionary];
+    profile[@"name"] = versionId;
+    profile[@"lastVersionId"] = versionId;
+    PLProfiles.current.profiles[versionId] = profile;
+    PLProfiles.current.selectedProfileName = versionId;
+    [PLProfiles.current save];
+
     LauncherNavigationController *nav = (LauncherNavigationController *)self.navigationController;
-    if (indexPath.row == 0) {
-        [self.navigationController pushViewController:[[LauncherProfilesViewController alloc] init] animated:YES];
-    } else {
-        [nav enterModInstaller];
-    }
+    UITextField *field = [nav valueForKey:@"versionTextField"];
+    [field setText:versionId];
+    [nav popToRootViewControllerAnimated:NO];
+    [nav launchMinecraft:self.view];
 }
 
 @end
