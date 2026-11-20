@@ -242,7 +242,12 @@
     selectedBG.layer.cornerRadius = 8;
     cell.selectedBackgroundView = selectedBG;
     NSString *iconName = [self.options[indexPath.row] performSelector:@selector(imageName)];
-    cell.imageView.image = [FCLTheme templateIcon:iconName];
+    UIImage *iconImage = [FCLTheme templateIcon:iconName];
+    UIGraphicsImageRenderer *iconRenderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(26, 26)];
+    UIImage *sizedIcon = [iconRenderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+        [iconImage drawInRect:CGRectMake(0, 0, 26, 26)];
+    }];
+    cell.imageView.image = [sizedIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     cell.imageView.tintColor = [UIColor whiteColor];
     cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
     return cell;
