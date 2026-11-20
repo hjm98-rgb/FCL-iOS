@@ -294,12 +294,6 @@
     }
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    [self refreshAccount];
-    [self refreshVersion];
-}
-
 - (void)refreshVersion {
     NSString *name = PLProfiles.current.selectedProfileName;
     if (name.length == 0) {
