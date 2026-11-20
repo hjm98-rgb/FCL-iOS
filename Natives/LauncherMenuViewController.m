@@ -119,7 +119,7 @@
     homeItem.title = @"主页";
     homeItem.imageName = @"fcl_home";
     LauncherMenuCustomItem *manageItem = [LauncherMenuCustomItem title:@"版本管理" imageName:@"fcl_manage" action:nil];
-    manageItem.vcArray = @[[[LauncherProfilesViewController alloc] init]];
+    manageItem.vcArray = @[[[FCLVersionManageViewController alloc] init]];
     LauncherMenuCustomItem *downloadItem = [LauncherMenuCustomItem vcClass:FCLDownloadViewController.class];
     downloadItem.title = @"下载";
     downloadItem.imageName = @"fcl_download";
@@ -127,7 +127,7 @@
     multiplayerItem.title = @"联机";
     multiplayerItem.imageName = @"fcl_multiplayer";
     LauncherMenuCustomItem *settingsItem = [LauncherMenuCustomItem title:@"设置" imageName:@"fcl_settings" action:nil];
-    settingsItem.vcArray = @[[[LauncherPreferencesViewController alloc] init]];
+    settingsItem.vcArray = @[[[FCLSettingsViewController alloc] init]];
     LauncherMenuCustomItem *controllerItem = [LauncherMenuCustomItem title:@"控制器" imageName:@"fcl_controller" action:^{
         [contentNavigationController performSelector:@selector(enterCustomControls)];
     }];
@@ -214,6 +214,16 @@
     [self updateAccountInfo];
     
     return self.accountBtnItem;
+}
+
+- (void)selectRow:(NSInteger)row {
+    if (row < 0 || row >= (NSInteger)self.options.count) {
+        return;
+    }
+    NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:0];
+    [self.tableView selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
+    [self tableView:self.tableView didSelectRowAtIndexPath:path];
+    self.lastSelectedIndex = (int)row;
 }
 
 - (void)restoreHighlightedSelection {
