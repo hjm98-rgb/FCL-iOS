@@ -22,6 +22,14 @@
 @interface FCLDownloadViewController : UIViewController
 @end
 
+// "版本管理" page: FCL version manager.
+@interface FCLVersionManageViewController : UIViewController
+@end
+
+// "设置" page: FCL settings list.
+@interface FCLSettingsViewController : UIViewController
+@end
+
 // "联机" page: FCL multiplayer entry points.
 @interface FCLMultiplayerViewController : UIViewController
 @end
