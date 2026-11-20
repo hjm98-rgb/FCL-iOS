@@ -283,7 +283,21 @@
     } else {
         self.hintLabel.text = @"离线账户";
     }
-    self.avatarView.image = [UIImage imageNamed:@"DefaultAccount"];
+    NSString *pic = data[@"profilePicURL"];
+    if (pic.length > 0) {
+        [self.avatarView setImageWithURL:[NSURL URLWithString:pic] placeholderImage:[UIImage imageNamed:@"DefaultAccount"]];
+    } else if (username.length > 0) {
+        NSString *headURL = [NSString stringWithFormat:@"https://minotar.net/helm/%@/64.png", [username stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]]];
+        [self.avatarView setImageWithURL:[NSURL URLWithString:headURL] placeholderImage:[UIImage imageNamed:@"DefaultAccount"]];
+    } else {
+        self.avatarView.image = [UIImage imageNamed:@"DefaultAccount"];
+    }
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self refreshAccount];
+    [self refreshVersion];
 }
 
 - (void)refreshVersion {

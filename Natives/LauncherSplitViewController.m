@@ -25,7 +25,8 @@ extern NSMutableDictionary *prefDict;
 
     UINavigationController *masterVc = [[UINavigationController alloc] initWithRootViewController:[[LauncherMenuViewController alloc] init]];
     LauncherNavigationController *detailVc = [[LauncherNavigationController alloc] initWithRootViewController:[[FCLHomeViewController alloc] init]];
-    detailVc.toolbarHidden = NO;
+    detailVc.toolbarHidden = YES;
+    detailVc.navigationBarHidden = YES;
 
     self.viewControllers = @[masterVc, detailVc];
     [self changeDisplayModeForSize:self.view.frame.size];

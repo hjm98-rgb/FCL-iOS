@@ -11,7 +11,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>FCL</string>
 	<key>CFBundleExecutable</key>
-	<string>AngelAuraAmethyst</string>
+	<string>FCL</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundleAlternateIcons</key>
@@ -74,11 +74,11 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>org.angelauramc.amethyst</string>
+	<string>org.fclteam.foldcraftlauncher</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>AngelAuraAmethyst</string>
+	<string>FCL</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -89,10 +89,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>org.angelauramc.amethyst.urlscheme</string>
+			<string>org.fclteam.foldcraftlauncher.urlscheme</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>amethyst</string>
+				<string>fcl</string>
 			</array>
 		</dict>
 	</array>
@@ -128,9 +128,9 @@
 		<string>_altserver._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Angel Aura Amethyst uses the local network to find and communicate with AltServer and LAN servers.</string>
+	<string>FCL 使用本地网络连接局域网服务器与 AltServer 以启用 JIT。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Angel Aura Amethyst uses the microphone to enable support for voice chat mods.</string>
+	<string>FCL 使用麦克风以支持语音聊天模组。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
